@@ -339,4 +339,5 @@ MAE = 0.08 п.п.
 
 ---
 
-
+<img src="log_graph.png" alt="Опис" width="1000">
+<img src="log_graph_2.png" alt="Опис" width="1000">

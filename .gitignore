@@ -35,10 +35,6 @@ data/raw/*.csv
 data/raw/*.xlsx
 data/raw/*.json
 
-# Reports / outputs (generated)
-reports/figures/*.png
-reports/figures/*.pdf
-
 # Environment variables
 .env
 *.env
