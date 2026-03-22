@@ -28,26 +28,26 @@ jobs:
       matrix:
         module: [data_load, data_quality_analysis, analysis_and_models, data_visualization]
 
-    # Якщо workflow_dispatch і обрано конкретний модуль — пропускаємо інші
-    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module }}
-
     steps:
       - name: Checkout
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module }}
         uses: actions/checkout@v4
 
       - name: Set up Python
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
       - name: Install dependencies
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module }}
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run module - data_load
-        if: matrix.module == 'data_load'
+        if: ${{ matrix.module == 'data_load' && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
         run: |
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }}"
@@ -55,7 +55,7 @@ jobs:
           echo "Module ${{ matrix.module }} completed successfully" >> artifacts/${{ matrix.module }}/status.txt
 
       - name: Run module - data_quality_analysis
-        if: matrix.module == 'data_quality_analysis'
+        if: ${{ matrix.module == 'data_quality_analysis' && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
         run: |
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }} notebook"
@@ -64,7 +64,7 @@ jobs:
           echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
 
       - name: Run module - analysis_and_models
-        if: matrix.module == 'analysis_and_models'
+        if: ${{ matrix.module == 'analysis_and_models' && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
         run: |
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }} notebook"
@@ -73,7 +73,7 @@ jobs:
           echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
 
       - name: Run module - data_visualization
-        if: matrix.module == 'data_visualization'
+        if: ${{ matrix.module == 'data_visualization' && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
         run: |
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }} notebook"
@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
         with:
           name: artifacts-${{ matrix.module }}
           path: artifacts/${{ matrix.module }}
