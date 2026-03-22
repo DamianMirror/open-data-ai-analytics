@@ -46,6 +46,12 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      - name: Download data (required for notebooks)
+        if: ${{ matrix.module != 'data_load' && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
+        run: |
+          echo "Downloading data for notebooks..."
+          python -m src.data_load
+
       - name: Run module - data_load
         if: ${{ matrix.module == 'data_load' && (github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module) }}
         run: |

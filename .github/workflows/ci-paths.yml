@@ -93,6 +93,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Download data (required for notebooks)
+        if: steps.filter.outputs.notebooks == 'true'
+        run: |
+          echo "Downloading data for notebooks..."
+          python -m src.data_load
+
       - name: Run notebook - ${{ matrix.notebook }}
         if: steps.filter.outputs.notebooks == 'true'
         run: |
