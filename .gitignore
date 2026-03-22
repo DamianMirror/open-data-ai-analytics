@@ -31,9 +31,11 @@ build/
 Thumbs.db
 
 # Data files (large raw data)
-data/raw/*.csv
+# Note: nabir-16-2020-2021.csv is small and committed for CI/CD reliability
 data/raw/*.xlsx
 data/raw/*.json
+# Uncomment below to ignore large CSV files:
+# data/raw/*.csv
 
 # Environment variables
 .env
