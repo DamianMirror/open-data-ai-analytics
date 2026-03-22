@@ -23,20 +23,20 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Use system Python (self-hosted)
-        shell: pwsh
+        shell: powershell
         run: |
           python --version
           pip --version
 
       - name: Install dependencies
-        shell: pwsh
+        shell: powershell
         run: |
           python -m pip install --upgrade pip
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
 
       - name: Run module - data_load
         if: github.event.inputs.module == 'data_load'
-        shell: pwsh
+        shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
           Write-Output "Running ${{ github.event.inputs.module }} on self-hosted runner"
@@ -46,7 +46,7 @@ jobs:
 
       - name: Run module - data_quality_analysis
         if: github.event.inputs.module == 'data_quality_analysis'
-        shell: pwsh
+        shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
           Write-Output "Running ${{ github.event.inputs.module }} notebook on self-hosted runner"
@@ -56,7 +56,7 @@ jobs:
 
       - name: Run module - analysis_and_models
         if: github.event.inputs.module == 'analysis_and_models'
-        shell: pwsh
+        shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
           Write-Output "Running ${{ github.event.inputs.module }} notebook on self-hosted runner"
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run module - data_visualization
         if: github.event.inputs.module == 'data_visualization'
-        shell: pwsh
+        shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
           Write-Output "Running ${{ github.event.inputs.module }} notebook on self-hosted runner"
@@ -88,7 +88,7 @@ jobs:
 
       - name: Performance metrics
         if: always()
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Output "=== Self-hosted Runner Performance ==="
           Write-Output "Hostname: $env:COMPUTERNAME"
