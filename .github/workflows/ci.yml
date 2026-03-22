@@ -156,6 +156,30 @@ jobs:
             echo "<li><a href='$module/'>$module</a></li>" >> public/index.html
             mkdir -p public/$module
             cp -r $dir/* public/$module/ 2>/dev/null || true
+
+            # Створити index.html для кожного модуля
+            echo "<!DOCTYPE html><html><head><title>$module - Results</title>" > public/$module/index.html
+            echo "<style>body{font-family:Arial,sans-serif;max-width:800px;margin:50px auto;padding:20px}" >> public/$module/index.html
+            echo "h1{color:#333}ul{list-style-type:none;padding:0}li{margin:10px 0}" >> public/$module/index.html
+            echo "a{color:#0366d6;text-decoration:none;font-size:18px}a:hover{text-decoration:underline}" >> public/$module/index.html
+            echo ".back{margin-top:30px}</style></head><body>" >> public/$module/index.html
+            echo "<h1>Module: $module</h1><h2>Available Files:</h2><ul>" >> public/$module/index.html
+
+            # Додати посилання на HTML файли якщо є
+            if [ -f "public/$module/${module}.html" ]; then
+              echo "<li><a href='${module}.html'>Notebook HTML Report</a></li>" >> public/$module/index.html
+            fi
+            if [ -f "public/$module/run.log" ]; then
+              echo "<li><a href='run.log'>Execution Log</a></li>" >> public/$module/index.html
+            fi
+            if [ -f "public/$module/status.txt" ]; then
+              echo "<li><a href='status.txt'>Status</a></li>" >> public/$module/index.html
+            fi
+            if [ -d "public/$module/figures" ]; then
+              echo "<li><a href='figures/'>Generated Figures</a></li>" >> public/$module/index.html
+            fi
+
+            echo "</ul><div class='back'><a href='../'>← Back to main page</a></div></body></html>" >> public/$module/index.html
           done
 
           echo "</ul>" >> public/index.html
