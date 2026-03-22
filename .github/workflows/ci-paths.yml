@@ -21,18 +21,17 @@ jobs:
   data-load-module:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check for src changes
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
             src:
               - 'src/**'
               - 'requirements.txt'
-
-      - name: Checkout
-        if: steps.filter.outputs.src == 'true'
-        uses: actions/checkout@v4
 
       - name: Set up Python
         if: steps.filter.outputs.src == 'true'
@@ -69,18 +68,17 @@ jobs:
         notebook: [data_quality_analysis, analysis_and_models, data_visualization]
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check for notebook changes
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
             notebooks:
               - 'notebooks/**'
               - 'requirements.txt'
-
-      - name: Checkout
-        if: steps.filter.outputs.notebooks == 'true'
-        uses: actions/checkout@v4
 
       - name: Set up Python
         if: steps.filter.outputs.notebooks == 'true'
