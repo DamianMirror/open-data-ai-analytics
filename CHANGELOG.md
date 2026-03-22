@@ -4,7 +4,7 @@
 
 ### Added
 - CI/CD infrastructure using GitHub Actions (Lab 2)
-- `requirements.txt`: Project dependencies (pandas, requests, matplotlib, jupyter, notebook)
+- `requirements.txt`: Project dependencies (pandas, numpy, requests, matplotlib, scipy, scikit-learn, jupyter, notebook)
 - `.github/workflows/ci.yml`: Main CI pipeline with matrix strategy
   - Automated testing of all modules (data_load, data_quality_analysis, analysis_and_models, data_visualization)
   - Parallel execution using matrix strategy
@@ -27,6 +27,9 @@
 ### Changed
 - Project now supports automated CI/CD workflows
 - All modules can be executed and verified automatically
+
+### Fixed
+- Added missing dependencies (scipy, numpy, scikit-learn) to requirements.txt for notebook execution
 
 ## [0.1.0] - 2026-02-26
 

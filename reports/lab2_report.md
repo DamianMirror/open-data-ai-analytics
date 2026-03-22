@@ -1,6 +1,12 @@
-# CI/CD Workflows - Open Data AI Analytics
+# Lab 2 Report: CI/CD Implementation
 
-Цей репозиторій використовує GitHub Actions для автоматизації CI/CD процесів.
+**Project:** Open Data AI Analytics
+**Course:** Data Engineering / MLOps
+**Date:** 2026-03-22
+
+## Overview
+
+This report documents the implementation of a complete CI/CD pipeline using GitHub Actions for automated testing, building, and deployment of data analytics modules.
 
 ## Огляд workflows
 
