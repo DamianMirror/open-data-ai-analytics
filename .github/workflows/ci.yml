@@ -66,7 +66,15 @@ jobs:
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }} notebook"
           # Конвертація ноутбука в HTML для перегляду результатів
+          set +e
           jupyter nbconvert --to html --execute notebooks/data_quality_analysis.ipynb --output-dir=artifacts/${{ matrix.module }} > artifacts/${{ matrix.module }}/run.log 2>&1
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "Notebook execution failed with exit code $EXIT_CODE"
+            echo "Last 50 lines of log:"
+            tail -50 artifacts/${{ matrix.module }}/run.log
+            exit $EXIT_CODE
+          fi
           echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
 
       - name: Run module - analysis_and_models
@@ -75,7 +83,15 @@ jobs:
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }} notebook"
           # Конвертація ноутбука в HTML
+          set +e
           jupyter nbconvert --to html --execute notebooks/analysis_and_models.ipynb --output-dir=artifacts/${{ matrix.module }} > artifacts/${{ matrix.module }}/run.log 2>&1
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "Notebook execution failed with exit code $EXIT_CODE"
+            echo "Last 50 lines of log:"
+            tail -50 artifacts/${{ matrix.module }}/run.log
+            exit $EXIT_CODE
+          fi
           echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
 
       - name: Run module - data_visualization
@@ -84,7 +100,15 @@ jobs:
           mkdir -p artifacts/${{ matrix.module }}
           echo "Running ${{ matrix.module }} notebook"
           # Конвертація ноутбука в HTML
+          set +e
           jupyter nbconvert --to html --execute notebooks/data_visualization.ipynb --output-dir=artifacts/${{ matrix.module }} > artifacts/${{ matrix.module }}/run.log 2>&1
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "Notebook execution failed with exit code $EXIT_CODE"
+            echo "Last 50 lines of log:"
+            tail -50 artifacts/${{ matrix.module }}/run.log
+            exit $EXIT_CODE
+          fi
           # Копіювання згенерованих графіків якщо є
           if [ -d "reports/figures" ]; then
             cp -r reports/figures artifacts/${{ matrix.module }}/
