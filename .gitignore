@@ -42,3 +42,6 @@ data/raw/*.json
 # Logs
 *.log
 logs/
+
+# Documentation
+*.docx
