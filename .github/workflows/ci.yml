@@ -1,0 +1,145 @@
+name: CI (modules)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      module:
+        description: "Which module to run (or 'all')"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - data_load
+          - data_quality_analysis
+          - analysis_and_models
+          - data_visualization
+
+jobs:
+  run-modules:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [data_load, data_quality_analysis, analysis_and_models, data_visualization]
+
+    # Якщо workflow_dispatch і обрано конкретний модуль — пропускаємо інші
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run module - data_load
+        if: matrix.module == 'data_load'
+        run: |
+          mkdir -p artifacts/${{ matrix.module }}
+          echo "Running ${{ matrix.module }}"
+          python -m src.data_load > artifacts/${{ matrix.module }}/run.log 2>&1
+          echo "Module ${{ matrix.module }} completed successfully" >> artifacts/${{ matrix.module }}/status.txt
+
+      - name: Run module - data_quality_analysis
+        if: matrix.module == 'data_quality_analysis'
+        run: |
+          mkdir -p artifacts/${{ matrix.module }}
+          echo "Running ${{ matrix.module }} notebook"
+          # Конвертація ноутбука в HTML для перегляду результатів
+          jupyter nbconvert --to html --execute notebooks/data_quality_analysis.ipynb --output-dir=artifacts/${{ matrix.module }} > artifacts/${{ matrix.module }}/run.log 2>&1
+          echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
+
+      - name: Run module - analysis_and_models
+        if: matrix.module == 'analysis_and_models'
+        run: |
+          mkdir -p artifacts/${{ matrix.module }}
+          echo "Running ${{ matrix.module }} notebook"
+          # Конвертація ноутбука в HTML
+          jupyter nbconvert --to html --execute notebooks/analysis_and_models.ipynb --output-dir=artifacts/${{ matrix.module }} > artifacts/${{ matrix.module }}/run.log 2>&1
+          echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
+
+      - name: Run module - data_visualization
+        if: matrix.module == 'data_visualization'
+        run: |
+          mkdir -p artifacts/${{ matrix.module }}
+          echo "Running ${{ matrix.module }} notebook"
+          # Конвертація ноутбука в HTML
+          jupyter nbconvert --to html --execute notebooks/data_visualization.ipynb --output-dir=artifacts/${{ matrix.module }} > artifacts/${{ matrix.module }}/run.log 2>&1
+          # Копіювання згенерованих графіків якщо є
+          if [ -d "reports/figures" ]; then
+            cp -r reports/figures artifacts/${{ matrix.module }}/
+          fi
+          echo "Notebook ${{ matrix.module }} executed successfully" >> artifacts/${{ matrix.module }}/status.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts-${{ matrix.module }}
+          path: artifacts/${{ matrix.module }}
+          retention-days: 30
+
+  # CD Job - публікація результатів у GitHub Pages
+  publish-results:
+    needs: run-modules
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts-download
+
+      - name: Prepare Pages content
+        run: |
+          mkdir -p public
+          echo "<h1>Open Data AI Analytics - CI/CD Results</h1>" > public/index.html
+          echo "<p>Build date: $(date)</p>" >> public/index.html
+          echo "<ul>" >> public/index.html
+
+          # Додати посилання на артефакти
+          for dir in artifacts-download/artifacts-*; do
+            module=$(basename $dir | sed 's/artifacts-//')
+            echo "<li><a href='$module/'>$module</a></li>" >> public/index.html
+            mkdir -p public/$module
+            cp -r $dir/* public/$module/ 2>/dev/null || true
+          done
+
+          echo "</ul>" >> public/index.html
+
+          # Копіювати звіти якщо є
+          if [ -d "reports/figures" ]; then
+            cp -r reports/figures public/
+          fi
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,109 @@
+name: CI (path filters)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'src/**'
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - '.github/workflows/ci-paths.yml'
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'src/**'
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - '.github/workflows/ci-paths.yml'
+
+jobs:
+  # Запускається тільки якщо змінились файли src/
+  data-load-module:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for src changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'requirements.txt'
+
+      - name: Checkout
+        if: steps.filter.outputs.src == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: steps.filter.outputs.src == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        if: steps.filter.outputs.src == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run data_load module
+        if: steps.filter.outputs.src == 'true'
+        run: |
+          mkdir -p artifacts/data_load
+          python -m src.data_load > artifacts/data_load/run.log 2>&1
+
+      - name: Upload artifacts
+        if: steps.filter.outputs.src == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-data-load-paths
+          path: artifacts/data_load
+
+  # Запускається тільки якщо змінились ноутбуки
+  notebooks-module:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: [data_quality_analysis, analysis_and_models, data_visualization]
+
+    steps:
+      - name: Check for notebook changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            notebooks:
+              - 'notebooks/**'
+              - 'requirements.txt'
+
+      - name: Checkout
+        if: steps.filter.outputs.notebooks == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: steps.filter.outputs.notebooks == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        if: steps.filter.outputs.notebooks == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run notebook - ${{ matrix.notebook }}
+        if: steps.filter.outputs.notebooks == 'true'
+        run: |
+          mkdir -p artifacts/${{ matrix.notebook }}
+          jupyter nbconvert --to html --execute notebooks/${{ matrix.notebook }}.ipynb --output-dir=artifacts/${{ matrix.notebook }}
+
+      - name: Upload artifacts
+        if: steps.filter.outputs.notebooks == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.notebook }}-paths
+          path: artifacts/${{ matrix.notebook }}

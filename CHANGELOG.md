@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.2.0] - 2026-03-22
+
+### Added
+- CI/CD infrastructure using GitHub Actions (Lab 2)
+- `requirements.txt`: Project dependencies (pandas, requests, matplotlib, jupyter, notebook)
+- `.github/workflows/ci.yml`: Main CI pipeline with matrix strategy
+  - Automated testing of all modules (data_load, data_quality_analysis, analysis_and_models, data_visualization)
+  - Parallel execution using matrix strategy
+  - Jupyter notebooks execution and HTML conversion
+  - Artifacts upload (logs, reports, figures)
+  - CD: Automatic GitHub Pages deployment on main branch
+- `.github/workflows/ci-selfhosted.yml`: Self-hosted runner workflow
+  - Manual trigger with module selection
+  - Performance metrics collection
+  - Local resource access support
+- `.github/workflows/ci-paths.yml`: Path-based filtering workflow (bonus)
+  - Smart module execution based on changed files
+  - Optimized CI resource usage
+- `.github/workflows/README.md`: Comprehensive CI/CD documentation
+  - Workflows overview and usage instructions
+  - Self-hosted runner setup guide
+  - GitHub Pages configuration
+  - Comparison: GitHub-hosted vs Self-hosted runners
+
+### Changed
+- Project now supports automated CI/CD workflows
+- All modules can be executed and verified automatically
+
 ## [0.1.0] - 2026-02-26
 
 ### Added

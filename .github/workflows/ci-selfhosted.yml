@@ -1,0 +1,99 @@
+name: CI (self-hosted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: "Which module to run on self-hosted runner"
+        required: true
+        default: "data_visualization"
+        type: choice
+        options:
+          - data_load
+          - data_quality_analysis
+          - analysis_and_models
+          - data_visualization
+
+jobs:
+  run-on-selfhosted:
+    runs-on: [self-hosted, windows]  
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use system Python (self-hosted)
+        shell: pwsh
+        run: |
+          python --version
+          pip --version
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+
+      - name: Run module - data_load
+        if: github.event.inputs.module == 'data_load'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
+          Write-Output "Running ${{ github.event.inputs.module }} on self-hosted runner"
+          python -m src.data_load > "artifacts/${{ github.event.inputs.module }}/run.log" 2>&1
+          "Module completed on self-hosted runner at $(Get-Date)" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+          "Runner: $env:COMPUTERNAME" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+
+      - name: Run module - data_quality_analysis
+        if: github.event.inputs.module == 'data_quality_analysis'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
+          Write-Output "Running ${{ github.event.inputs.module }} notebook on self-hosted runner"
+          jupyter nbconvert --to html --execute notebooks/data_quality_analysis.ipynb --output-dir="artifacts/${{ github.event.inputs.module }}" > "artifacts/${{ github.event.inputs.module }}/run.log" 2>&1
+          "Notebook completed on self-hosted runner at $(Get-Date)" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+          "Runner: $env:COMPUTERNAME" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+
+      - name: Run module - analysis_and_models
+        if: github.event.inputs.module == 'analysis_and_models'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
+          Write-Output "Running ${{ github.event.inputs.module }} notebook on self-hosted runner"
+          jupyter nbconvert --to html --execute notebooks/analysis_and_models.ipynb --output-dir="artifacts/${{ github.event.inputs.module }}" > "artifacts/${{ github.event.inputs.module }}/run.log" 2>&1
+          "Notebook completed on self-hosted runner at $(Get-Date)" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+          "Runner: $env:COMPUTERNAME" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+
+      - name: Run module - data_visualization
+        if: github.event.inputs.module == 'data_visualization'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "artifacts/${{ github.event.inputs.module }}"
+          Write-Output "Running ${{ github.event.inputs.module }} notebook on self-hosted runner"
+          jupyter nbconvert --to html --execute notebooks/data_visualization.ipynb --output-dir="artifacts/${{ github.event.inputs.module }}" > "artifacts/${{ github.event.inputs.module }}/run.log" 2>&1
+          # Копіювання згенерованих графіків
+          if (Test-Path "reports/figures") {
+            Copy-Item -Recurse "reports/figures" "artifacts/${{ github.event.inputs.module }}/"
+          }
+          "Notebook completed on self-hosted runner at $(Get-Date)" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+          "Runner: $env:COMPUTERNAME" | Out-File -Append "artifacts/${{ github.event.inputs.module }}/status.txt"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts-${{ github.event.inputs.module }}-selfhosted
+          path: artifacts/${{ github.event.inputs.module }}
+          retention-days: 30
+
+      - name: Performance metrics
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Output "=== Self-hosted Runner Performance ==="
+          Write-Output "Hostname: $env:COMPUTERNAME"
+          Write-Output "OS: $((Get-CimInstance Win32_OperatingSystem).Caption)"
+          Write-Output "CPU: $((Get-CimInstance Win32_Processor).NumberOfLogicalProcessors) cores"
+          Write-Output "Memory: $([math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)) GB"
+          Write-Output "Disk: $([math]::Round((Get-PSDrive C).Free / 1GB, 2)) GB free"
+          Write-Output "Python: $(python --version)"
