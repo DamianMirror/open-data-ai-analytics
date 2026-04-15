@@ -48,3 +48,10 @@ logs/
 # Documentation
 *.docx
 lab2.txt
+
+# Docker volumes and generated data
+db/
+plots/*.png
+reports/*.json
+reports/*.txt
+postgres_data/

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Research - Ukraine Economic Data Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Research Analysis Report</h3>
+            </div>
+            <div class="card-body">
+                {% if report_text %}
+                <pre>{{ report_text }}</pre>
+                {% else %}
+                <div class="alert alert-warning">
+                    Research analysis report not yet generated. Please ensure the data_research service has run.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

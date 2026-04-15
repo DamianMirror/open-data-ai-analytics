@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Visualizations - Ukraine Economic Data Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Data Visualizations</h3>
+            </div>
+            <div class="card-body">
+                {% if summary %}
+                <div class="alert alert-info">
+                    <pre>{{ summary }}</pre>
+                </div>
+                {% endif %}
+
+                {% if plots %}
+                <div class="row">
+                    {% for plot in plots %}
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>{{ plot.replace('_', ' ').replace('.png', '').title() }}</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <img src="/plots/{{ plot }}" alt="{{ plot }}" class="img-fluid" style="max-width: 100%; height: auto;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    No visualizations available yet. Please ensure the visualization service has run.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

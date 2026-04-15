@@ -1,0 +1,143 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ukraine_data_postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ukraine_data}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - ukraine_data_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Data Load Service
+  data_load:
+    build:
+      context: ./data_load
+      dockerfile: Dockerfile
+    container_name: ukraine_data_load
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ukraine_data}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./data/raw:/app/data
+      - ./reports:/app/reports
+    networks:
+      - ukraine_data_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  # Data Quality Analysis Service
+  data_quality_analysis:
+    build:
+      context: ./data_quality_analysis
+      dockerfile: Dockerfile
+    container_name: ukraine_quality_analysis
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ukraine_data}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./reports:/app/reports
+    networks:
+      - ukraine_data_network
+    depends_on:
+      data_load:
+        condition: service_completed_successfully
+    restart: on-failure
+
+  # Data Research Service
+  data_research:
+    build:
+      context: ./data_research
+      dockerfile: Dockerfile
+    container_name: ukraine_research
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ukraine_data}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./reports:/app/reports
+    networks:
+      - ukraine_data_network
+    depends_on:
+      data_load:
+        condition: service_completed_successfully
+    restart: on-failure
+
+  # Visualization Service
+  visualization:
+    build:
+      context: ./visualization
+      dockerfile: Dockerfile
+    container_name: ukraine_visualization
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ukraine_data}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./plots:/app/plots
+    networks:
+      - ukraine_data_network
+    depends_on:
+      data_load:
+        condition: service_completed_successfully
+    restart: on-failure
+
+  # Web Interface Service
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: ukraine_web
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ukraine_data}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./reports:/app/reports
+      - ./plots:/app/plots
+    ports:
+      - "${WEB_PORT:-5000}:5000"
+    networks:
+      - ukraine_data_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      data_quality_analysis:
+        condition: service_completed_successfully
+      data_research:
+        condition: service_completed_successfully
+      visualization:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+networks:
+  ukraine_data_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

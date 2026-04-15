@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Ukraine Economic Data Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-danger">
+                <h3 class="mb-0">Error</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <strong>An error occurred:</strong>
+                    <pre>{{ error }}</pre>
+                </div>
+                <a href="/" class="btn btn-primary">Return to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Ukraine Economic Data Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Welcome to Ukraine Economic Data Analytics</h3>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    This platform provides comprehensive analysis of Ukraine's economic forecasts for 2020-2021,
+                    covering multiple scenarios and key economic indicators.
+                </p>
+
+                <h4 class="mt-4">Available Modules:</h4>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">📊 Data Viewer</h5>
+                                <p class="card-text">
+                                    View the complete economic indicators dataset loaded from CSV into PostgreSQL database.
+                                </p>
+                                <a href="/data" class="btn btn-primary">View Data</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">🔍 Quality Analysis</h5>
+                                <p class="card-text">
+                                    Explore data quality metrics including missing values, duplicates, and data type validation.
+                                </p>
+                                <a href="/quality" class="btn btn-primary">View Analysis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">📈 Research Results</h5>
+                                <p class="card-text">
+                                    Review statistical analysis and research findings from the economic forecast data.
+                                </p>
+                                <a href="/research" class="btn btn-primary">View Research</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">📉 Visualizations</h5>
+                                <p class="card-text">
+                                    Explore interactive charts and graphs showing trends and scenario comparisons.
+                                </p>
+                                <a href="/visualizations" class="btn btn-primary">View Charts</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <strong>About the Data:</strong> This analysis is based on official Ukrainian government forecasts
+                    for key economic and social development indicators covering 2020-2021, including GDP, inflation,
+                    employment, and wages across three different scenarios.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

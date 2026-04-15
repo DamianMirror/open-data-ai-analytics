@@ -1,0 +1,47 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+*.txt
+*.docx
+lab2.txt
+lab3.docx
+
+# Reports and outputs (these will be generated)
+reports/
+plots/
+db/
+
+# Node modules (if any)
+node_modules/
+
+# Notebooks (not needed in containers)
+notebooks/

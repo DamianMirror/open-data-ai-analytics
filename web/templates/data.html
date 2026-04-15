@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Data - Ukraine Economic Data Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Economic Indicators Dataset</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <strong>Dataset Info:</strong> {{ row_count }} indicators × {{ col_count }} columns
+                </div>
+
+                <div class="table-responsive">
+                    {{ table|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
