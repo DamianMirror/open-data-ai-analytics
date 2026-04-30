@@ -9,7 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY app.py .
 COPY templates/ templates/
-COPY static/ static/
 
 # Create directories
 RUN mkdir -p /app/reports /app/plots
