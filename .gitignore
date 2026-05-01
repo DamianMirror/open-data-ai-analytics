@@ -49,6 +49,9 @@ logs/
 *.docx
 lab2.txt
 lab4.txt
+lab5.txt
+
+
 
 # Docker volumes and generated data
 db/
