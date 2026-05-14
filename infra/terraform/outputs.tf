@@ -30,7 +30,7 @@ output "prometheus_url" {
 
 output "argocd_url" {
   description = "URL of the Argo CD UI"
-  value       = "http://${azurerm_public_ip.main.ip_address}:8080"
+  value       = "http://${azurerm_public_ip.main.ip_address}:30800"
 }
 
 output "k8s_app_url" {
