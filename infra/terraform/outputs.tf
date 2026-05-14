@@ -27,3 +27,13 @@ output "prometheus_url" {
   description = "URL of the Prometheus UI"
   value       = "http://${azurerm_public_ip.main.ip_address}:9090"
 }
+
+output "argocd_url" {
+  description = "URL of the Argo CD UI"
+  value       = "http://${azurerm_public_ip.main.ip_address}:8080"
+}
+
+output "k8s_app_url" {
+  description = "URL of the app deployed via Kubernetes"
+  value       = "http://${azurerm_public_ip.main.ip_address}:30080"
+}

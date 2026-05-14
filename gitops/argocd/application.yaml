@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ukraine-analytics
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/DamianMirror/open-data-ai-analytics
+    targetRevision: main
+    path: gitops/app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ukraine-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

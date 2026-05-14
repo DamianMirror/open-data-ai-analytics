@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ukraine-web
+  namespace: ukraine-app
+  labels:
+    app: ukraine-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ukraine-web
+  template:
+    metadata:
+      labels:
+        app: ukraine-web
+    spec:
+      containers:
+        - name: ukraine-web
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          env:
+            - name: APP_VERSION
+              value: "1.0"

@@ -18,18 +18,44 @@ runcmd:
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | tee /etc/apt/sources.list.d/docker.list
   - apt-get update
   - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-  # Start and enable Docker
   - systemctl start docker
   - systemctl enable docker
-
-  # Add azureuser to docker group
   - usermod -aG docker azureuser
 
   # Clone the project
   - git clone https://github.com/DamianMirror/open-data-ai-analytics.git /app
 
-  # Start the application
+  # Start the main application
   - cd /app && docker compose up -d --build
 
-final_message: "Cloud-init setup completed. App is running."
+  # Start monitoring stack
+  - cd /app && docker compose -f monitoring/docker-compose.monitoring.yml up -d
+
+  # Install k3s (without traefik to avoid port conflicts)
+  - curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik" sh -
+
+  # Wait for k3s to be ready
+  - sleep 30
+
+  # Set up kubeconfig for azureuser
+  - mkdir -p /home/azureuser/.kube
+  - cp /etc/rancher/k3s/k3s.yaml /home/azureuser/.kube/config
+  - chown azureuser:azureuser /home/azureuser/.kube/config
+  - chmod 600 /home/azureuser/.kube/config
+  - echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> /home/azureuser/.bashrc
+
+  # Install Argo CD
+  - kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml create namespace argocd
+  - kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+  # Wait for Argo CD pods to start
+  - sleep 120
+
+  # Patch Argo CD server to NodePort on 8080 (HTTP, insecure)
+  - kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
+  - kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml patch svc argocd-server -n argocd --type=json -p='[{"op":"replace","path":"/spec/ports/0/nodePort","value":8080}]'
+
+  # Deploy the Argo CD Application
+  - kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml apply -f /app/gitops/argocd/application.yaml
+
+final_message: "Cloud-init setup completed. App, monitoring, k3s and Argo CD are running."
